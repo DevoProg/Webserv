@@ -1,16 +1,16 @@
 NAME = webserv
 
-SRCS = 	sources/main.cpp \
+SRCS = 	sources/core/main.cpp \
 
 
-HEADERS	= includes/Webserv.hpp
+HEADERS	= includes/webserv.hpp
 
 OBJS = $(SRCS:.cpp=.o)
 
 COMP = c++
 
-COMPFLAGS = -Wall -Wextra -Werror -std=c++98
-COMPFLAGS += -g3 
+CFLAGS = -g3 -Wall -Wextra -Werror -std=c++98
+#CFLAGS +=  
 
 RM = rm -rf
 
@@ -21,11 +21,11 @@ all:
 	@$(MAKE) $(NAME) -j5
 
 $(NAME) : $(OBJS) $(HEADERS)
-	$(COMP) $(COMPFLAGS) $(OBJS) -o $(NAME)
+	$(COMP) $(CFLAGS) $(OBJS) -o $(NAME)
 	@echo $(YELLOW)- Webserv deployed! $(RESET)
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(OBJS) $(NAME)
 
 fclean: clean
 	$(RM) $(NAME)
@@ -33,3 +33,8 @@ fclean: clean
 re: 	fclean all
 
 .PHONY: all clean fclean re
+
+debug :
+	CFLAGS += -fsanitize=address
+	CFLAGS += -D DEBUG
+	MAKE all

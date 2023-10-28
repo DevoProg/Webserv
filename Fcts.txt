@@ -1,0 +1,507 @@
+ETUDE DE PROJET : WEBSERV
+
+
+
+Definitions des fonctions externes autorisées
+---------------------------------------------------------------------
+
+==> EXECVE : 
+
+int execve(const char *pathname, char *const argv[], char *const envp[]);
+
+> 	Utilisé pour exécuter des programmes à partir d'un processus.
+	- 'pathname' est le chemin d'accès au programme exécutable que vous souhaitez lancer.
+	- 'argv' est un tableau d'arguments passés au programme.
+	- 'envp' est un tableau de chaînes qui représentent l'environnement dans lequel le programme 
+	  sera exécuté.
+	  
+	  
+==> DUP : 
+
+int dup(int oldfd);
+
+>	Lorsqu'un programme ouvre un fichier, un descripteur de fichier est associé à ce fichier. 
+	La fonction dup() retourne un nouveau descripteur de fichier qui est une copie de 'oldfd'.
+	Ce nouveau descripteur sera le plus bas descripteur de fichier non utilisé.
+	Utile pour la redirection des entrées/sorties standard, ou pour dupliquer un descripteur
+	de fichier vers un autre descripteur.
+	
+==> DUP2 :
+
+int dup2(int oldfd, int newfd);
+
+>	Similaire à dup(), mais avec la possibilité de spécifier explicitement le descripteur de 
+	fichier vers lequel la copie sera effectuée.
+	- 'oldfd' est le descripteur de fichier à dupliquer.
+	- 'newfd' est le descripteur de fichier vers lequel oldfd doit être dupliqué.
+	
+==> PIPE : 
+
+int pipe(int filedes[2]); 
+
+>	Utilisée pour créer un tube (ou pipe) pour la communication entre processus.
+	Un pipe permet la communication unidirectionnelle entre deux processus, l'un 
+	écrivant dans le pipe et l'autre lisant à partir de ce pipe.
+	- 'filedes' est un tableau de deux descripteurs de fichiers int, où filedes[0] sera 
+	  utilisé pour la lecture depuis le pipe et filedes[1] pour l'écriture dans le pipe.
+	  
+==> STRERROR : 
+
+char* strerror(int errnum);
+
+>	Utilisée pour obtenir une chaîne de caractères décrivant un code d'erreur. Elle prend 
+	un code d'erreur en paramètre et renvoie une chaîne de caractères décrivant ce code d'erreur
+	spécifique.
+	- 'errnum' est le code d'erreur pour lequel vous souhaitez obtenir la description.
+	
+==> GAI_STRERROR : 
+
+const char* gai_strerror(int errcode);
+
+>	La fonction gai_strerror() est utilisée pour obtenir une description textuelle d'un
+	code d'erreur retourné par des fonctions comme getaddrinfo().
+	Envoie une chaîne de caractères qui décrit un code d'erreur lié à des problèmes de 
+	résolution de noms ou d'adresses IP.
+	- 'errcode' est le code d'erreur pour lequel vous souhaitez obtenir la description.
+	
+==> ERRNO : 
+
+std::cout << "Erreur d'ouverture de fichier : " << std::strerror(errno) << std::endl;
+
+>	Elle peut modifier la valeur de errno pour refléter le type d'erreur qui s'est produite.
+
+==> FORK : 
+
+pid_t fork(void);
+
+>	Elle crée un nouveau processus, souvent appelé le processus fils, qui est une copie exacte 
+	du processus appelant, également connu sous le nom de processus parent.
+	Ne prend aucun argument et retourne un entier de type 'pid_t' qui diffère selon le processus 
+	qui exécute la fonction.
+	- Dans le processus parent, le résultat retourné est le PID (identifiant de processus) du processus fils.
+	- Dans le processus fils, le résultat retourné est 0.
+	Après l'appel à fork(), les deux processus (le parent et le fils) continuent l'exécution
+	à partir du point où fork() a été appelé, ils peuvent être distingués par la valeur retournée de fork().
+	
+==> HTONS : 
+
+uint16_t htons(uint16_t hostshort);
+
+>	Utilisé pour convertir l'ordre des octets d'un entier court (sur 16 bits) de l'hôte 
+	(ordre d'octets natif de la machine) à l'ordre d'octets du réseau (big-endian).
+	- 'hostshort' est un entier court (16 bits) représentant un nombre en ordre d'octets de l'hôte.
+	Elle retourne un entier court (16 bits) avec le même contenu que hostshort, mais dans l'ordre
+	d'octets du réseau (big-endian).
+	
+==> HTONL : 
+
+uint32_t htonl(uint32_t hostlong);
+
+>	Utilisée pour convertir l'ordre des octets d'un entier long (sur 32 bits) de l'hôte
+	(ordre d'octets natif de la machine) à l'ordre d'octets du réseau (big-endian).
+	- 'hostlong' est un entier long (32 bits) représentant un nombre en ordre d'octets de l'hôte.
+	Elle retourne un entier long (32 bits) avec le même contenu que hostlong, mais dans l'ordre
+	d'octets du réseau (big-endian).
+
+==> NTOHS :
+
+uint16_t ntohs(uint16_t netshort);
+
+>	Utilisée pour convertir un entier court (sur 16 bits) de l'ordre d'octets du réseau (big-endian)
+	à l'ordre d'octets de l'hôte (ordre d'octets natif de la machine).
+	- 'netshort' est un entier court (16 bits) représentant un nombre en ordre d'octets du réseau.
+	Elle retourne un entier court (16 bits) avec le même contenu que netshort, mais dans l'ordre 
+	d'octets de l'hôte (l'ordre natif de la machine).
+	
+==> NTOHL : 
+
+uint32_t ntohl(uint32_t netlong);
+
+>	Utilisée pour convertir un entier long (sur 32 bits) de l'ordre d'octets du réseau (big-endian)
+	à l'ordre d'octets de l'hôte (ordre d'octets natif de la machine).
+	- 'netlong' est un entier long (32 bits) représentant un nombre en ordre d'octets du réseau.
+	Elle retourne un entier long (32 bits) avec le même contenu que netlong, mais dans l'ordre
+	d'octets de l'hôte (l'ordre natif de la machine).
+	
+==> SELECT : 
+
+int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+
+>	Utilisé pour surveiller plusieurs descripteurs de fichiers, tels que les sockets, les tubes (pipes)
+	ou les fichiers, afin de savoir s'ils sont prêts pour l'entrée, la sortie ou s'ils ont rencontré une exception.
+	- 'nfds' : le numéro du plus grand descripteur de fichier (plus un) dans l'ensemble de descripteurs surveillés.
+	- 'readfds' : un ensemble de descripteurs de fichiers à surveiller pour la lecture.
+	- 'writefds' : un ensemble de descripteurs de fichiers à surveiller pour l'écriture.
+	- 'exceptfds' : un ensemble de descripteurs de fichiers à surveiller pour les exceptions.
+	- 'timeout' : la durée maximale pour laquelle select() doit attendre avant de retourner. 
+	   Si timeout est NULL, select() peut bloquer jusqu'à ce qu'une activité se produise.
+	Le fonctionnement de select() est basé sur le concept de masques d'ensembles de descripteurs de fichiers (fd_set).
+	Avant d'appeler select() vous devez initialiser et préparer ces ensembles.
+	
+==> POLL :
+
+int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+
+>	Utilisée pour surveiller plusieurs descripteurs de fichiers, tels que les sockets, les tubes (pipes)
+	ou les fichiers, afin de savoir s'ils sont prêts pour l'entrée, la sortie ou s'ils ont rencontré une exception.
+	- 'fds' : un tableau de structures pollfd qui spécifie les descripteurs de fichiers à surveiller et les 
+	   événements à surveiller pour chaque descripteur.
+	- 'nfds' : le nombre d'éléments dans le tableau fds.
+	- 'timeout'd : le délai d'attente en millisecondes. Si timeout est -1, poll() attend indéfiniment jusqu'à 
+	   ce qu'un descripteur soit prêt.
+	   
+	La structure pollfd est utilisée pour spécifier les descripteurs de fichiers et les événements à surveiller.
+	
+	struct pollfd 
+	{
+    		int fd;        // Descripteur de fichier a surveillé.
+    		short events;  // Événements à surveiller sur de descripteur spécifié.
+    		short revents; // Événements produits et retournés par poll()
+	};
+	
+==> EPOLL (epoll_create, epoll_ctl, epoll_wait)
+	
+!! Specifique a LINUX
+
+> 	Elles sont utilisées pour gérer des événements sur les descripteurs de fichiers, tels que les sockets,
+	dans des applications à forte intensité d'entrées/sorties.
+	- 'epoll_create()' : Crée une instance de la structure de données du gestionnaire d'événements epoll. 
+	   Elle retourne un descripteur de fichier pour cette instance.	
+	- 'epoll_ctl()' : Contrôle l'ajout, la suppression ou la modification des descripteurs de fichiers 
+	   surveillés dans l'instance epoll.
+	- 'epoll_wait()' : Attend que des événements se produisent sur les descripteurs de fichiers surveillés
+	   dans l'instance epoll.
+	
+==> KQUEUE (kqueue, kevent)
+
+>	Spécifiques au système BSD, notamment présentes dans les systèmes comme FreeBSD.
+	Permettent de surveiller des changements sur plusieurs descripteurs de fichiers ou des événements sur les sockets.
+	- 'kqueue()' : crée un descripteur de file d'événements pour surveiller les changements sur
+	   les descripteurs de fichiers, les sockets ou d'autres types d'événements.
+	- 'kevent()' : permet de contrôler et d'attendre des événements pour une instance de file d'événements (kqueue).
+	   Elle peut être utilisée pour ajouter ou supprimer des événements surveillés, ainsi que pour attendre
+	   des changements sur les descripteurs surveillés.
+	   
+==> SOCKET : 
+
+int socket(int domain, int type, int protocol);
+
+>	Utilisée pour créer un nouveau point de terminaison pour les communications réseau, qu'il s'agisse
+	d'une connexion TCP, UDP ou d'autres types de communication réseau.
+	- 'domain' : spécifie le domaine de communication, tel que 'AF_INET' pour les communications IPv4 ou 'AF_INET6' pour IPv6.
+	- 'type' : indique le type de socket, comme 'SOCK_STREAM' pour TCP, 'SOCK_DGRAM' pour UDP, etc.
+	- 'protocol' : spécifie le protocole à utiliser avec le socket. Généralement mis à 0 pour laisser
+	   le système choisir automatiquement le protocole approprié.
+	
+==> ACCEPT : 
+
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+>	Utilisée pour accepter une nouvelle connexion sur un socket qui a été créé précédemment
+	en utilisant la fonction socket().
+	Principalement utilisée avec des sockets de type 'SOCK_STREAM' (par exemple, les sockets TCP)
+	dans le cadre de la programmation réseau.
+	- 'sockfd' : est le descripteur de fichier du socket sur lequel attendre une connexion entrante.
+	- 'addr' : est un pointeur vers une structure sockaddr où sera stockée l'adresse du client connecté.
+	- 'addrlen' : est un pointeur vers un entier sans signe indiquant la taille de la structure d'adresse.
+	'accept()' bloque l'exécution du programme jusqu'à ce qu'une connexion entrante soit détectée.
+	Lorsqu'une connexion est détectée, elle crée un nouveau descripteur de fichier (un nouveau socket)
+	qui est utilisé pour communiquer avec le client nouvellement connecté.
+	
+==> LISTEN : 
+
+int listen(int sockfd, int backlog);
+
+>	Utilisée en programmation réseau en C pour préparer un socket pour l'acceptation de connexions entrantes.
+	Elle est généralement utilisée avec des sockets de type 'SOCK_STREAM' (par exemple, des sockets TCP) et
+	suit la création d'un socket via la fonction socket() et la liaison d'une adresse via bind().
+	- 'sockfd' : est le descripteur de fichier du socket sur lequel attendre les connexions entrantes.
+	- 'backlog' : est un entier qui spécifie la taille maximale de la file d'attente des connexions en
+	   attente d'acceptation.
+	Une fois que listen() est appelée sur un socket, le socket est configuré pour accepter les
+	connexions entrantes. Cela crée une file d'attente des connexions en attente d'acceptation par la
+	fonction accept(). La file d'attente a une taille limitée spécifiée par le paramètre backlog.
+	
+==> SEND :
+
+ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+
+>	Utilisée pour envoyer des données sur une socket.
+	Utilisée pour les sockets orientés connexion, comme les sockets de type 'SOCK_STREAM' 
+	(par exemple, les sockets TCP).
+	- 'sockfd' : est le descripteur de fichier du socket à travers lequel les données seront envoyées.
+	- 'buf' : est un pointeur vers le buffer contenant les données à envoyer.
+	- 'len' : est la longueur des données à envoyer.
+	- 'flags' : sont des indicateurs de contrôle pour le mode d'envoi des données. 
+	   Habituellement, mis à 0 pour un fonctionnement standard.
+	La fonction send() retourne le nombre d'octets effectivement envoyés, ou -1 en cas d'erreur.
+	
+==> RECV : 
+
+ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+
+>	Utilisée pour recevoir des données depuis une socket. 
+	Elle est souvent utilisée avec des sockets de type 'SOCK_STREAM' (comme les sockets TCP)
+	pour recevoir des données transmises par un pair distant.
+	- 'sockfd' : est le descripteur de fichier du socket à partir duquel les données seront reçues.
+	- 'buf' : est un pointeur vers le buffer où les données reçues seront stockées.
+	- 'len' : est la longueur maximale des données que l'on souhaite recevoir.
+	- 'flags' : sont des indicateurs de contrôle pour le mode de réception des données.
+	   Habituellement mis à 0 pour un fonctionnement standard.
+	La fonction recv() retourne le nombre d'octets effectivement reçus, ou -1 en cas d'erreur.
+	Si la connexion est fermée, elle peut également retourner 0, indiquant la fin de la transmission de données.
+	
+==> BIND :
+
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+
+>	Utilisée dans la programmation réseau en langage C pour lier un socket à une adresse spécifique,
+	généralement une adresse IP et un numéro de port. 
+	- 'sockfd' : est le descripteur de fichier du socket que l'on souhaite lier à une adresse.
+	- 'addr' : est un pointeur vers une structure sockaddr qui contient les informations sur l'adresse
+	   à laquelle le socket doit être lié.
+	- 'addrlen' : est la longueur de la structure 'sockaddr'.
+	La structure 'sockaddr' doit être correctement initialisée pour le type de socket et l'adresse à
+	laquelle vous souhaitez associer le socket.
+	Par exemple, pour un socket Internet ('AF_INET'), vous utiliseriez 'struct sockaddr_in'.
+	
+==> CONNECT : 
+
+int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+
+>	Utilisée pour établir une connexion avec un socket distant, tel qu'un serveur, depuis un socket client.
+	Elle est couramment utilisée avec des sockets de type 'SOCK_STREAM' (comme les sockets TCP) pour établir 
+	des connexions réseau.
+	- 'sockfd' : est le descripteur de fichier du socket client qui va initier la connexion.
+	- 'addr' : est un pointeur vers une structure 'sockaddr' contenant les informations sur l'adresse
+	   du serveur auquel on souhaite se connecter.
+	- 'addrlen' : est la longueur de la structure 'sockaddr'.
+	Il est essentiel que la structure sockaddr soit correctement initialisée avec les informations sur 
+	l'adresse IP et le port du serveur distant auquel vous souhaitez vous connecter.
+	
+==> GETADDRINFO
+
+int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
+
+>	Utilisée pour résoudre des noms d'hôtes (noms de domaines) et des services en informations d'adresses IP,
+	en fournissant une manière flexible et portable d'obtenir des informations sur les adresses réseau.
+	- 'node' : le nom du nœud ou de l'adresse IP à résoudre.
+	- 'service' : le nom du service ou le numéro de port à résoudre.
+	- 'hints' : une structure 'addrinfo' qui contient des indications supplémentaires sur la façon de résoudre
+	   les informations d'adresse.
+	- 'res' : un pointeur vers un pointeur d'une liste d'éléments 'addrinfo' qui contiendra les informations d'adresse.
+	Cette fonction remplit une liste de structures addrinfo qui contiennent des informations sur les adresses réseau,
+	en fonction du nom du nœud (adresse IP ou nom de domaine) et du service (nom de service ou numéro de port).
+
+==> FREEADDRINFO : 
+
+void freeaddrinfo(struct addrinfo *res);
+
+>	Utilisée pour libérer la mémoire allouée dynamiquement pour une liste d'adresses réseau qui a été obtenue
+	précédemment via la fonction getaddrinfo().
+	- 'res' : est un pointeur vers la liste d'éléments addrinfo retournée par getaddrinfo().
+	Une fois que vous avez terminé d'utiliser les informations d'adresse obtenues via getaddrinfo()
+	et stockées dans une structure addrinfo, vous pouvez libérer la mémoire allouée en appelant la fonction
+	freeaddrinfo() avec le pointeur de cette structure.
+
+==> SETSOCKOPT : 
+
+int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
+
+>	Utilisée pour configurer des options pour un socket. Elle permet de définir des options de socket 
+	au niveau du protocole pour personnaliser le comportement des sockets.
+	- 'sockfd' : est le descripteur de fichier du socket pour lequel on veut configurer les options.
+	- 'level' : est le niveau auquel l'option sera appliquée. Il peut s'agir de 'SOL_SOCKET' pour les options
+	   au niveau du socket ou d'autres niveaux spécifiques au protocole.
+	- 'optname' : est le nom de l'option spécifique que l'on souhaite configurer.
+	- 'optval' : est un pointeur vers la valeur de l'option.
+	- 'optlen' : est la longueur de l'option.
+
+==> GETSOCKNAME : 
+
+int getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+>	Utilisée pour obtenir le nom local associé à un socket.
+	Elle permet de récupérer l'adresse et le numéro de port locaux associés à un socket.
+	Cela peut être utile pour obtenir des informations sur le socket, notamment lorsque le système 
+	choisit automatiquement un numéro de port pour un socket lié à une adresse.
+	- 'sockfd' : est le descripteur de fichier du socket pour lequel vous souhaitez obtenir les 
+	   informations sur le nom local.
+	- 'addr' : est un pointeur vers une structure sockaddr qui sera remplie avec l'adresse locale.
+	- 'addrlen' : est un pointeur vers un entier sans signe qui contient la taille de la structure sockaddr.
+	Après avoir appelé getsockname(), la structure sockaddr passée en paramètre sera remplie avec les 
+	détails de l'adresse locale (adresse IP et numéro de port) associée au socket.
+
+==> GETPROTOBYNAME : 
+
+struct protoent *getprotobyname(const char *name);
+
+>	Utilisée pour récupérer des informations sur un protocole réseau en utilisant son nom.
+	Cette fonction permet de traduire un nom de protocole en une structure protoent qui contient 
+	des informations sur ce protocole.
+	- 'name' : est le nom du protocole que vous souhaitez rechercher.
+	La fonction retourne un pointeur vers une structure protoent contenant des informations
+	sur le protocole s'il est trouvé.
+	Si le protocole n'est pas trouvé, la valeur de retour est NULL.
+
+	La structure protoent contient plusieurs champs, mais les plus couramment utilisés sont :
+
+	- 'p_name' : le nom du protocole.
+	- 'p_proto' : le numéro de protocole.
+
+==> FCNTL : 
+!! Specifique a OS_MAC, remplace write.
+!! Utilisable uniquement comme ca : fcntl(fd, F_SETFL, O_NONBLOCK);
+
+int fcntl(int fd, int cmd, ... /* arg */ );
+
+>	Utilisée pour réaliser diverses opérations de contrôle sur des descripteurs de fichiers.
+	Elle peut être utilisée pour modifier les attributs d'un descripteur de fichier déjà ouvert,
+	comme des options de contrôle non spécifiques au fichier.
+	- 'fd' : est le descripteur de fichier sur lequel l'opération de contrôle va être réalisée.
+	- 'cmd' : est la commande spécifiant l'opération de contrôle à effectuer.
+	- 'arg' : est un argument optionnel selon l'opération de contrôle spécifiée.
+	La fonction fcntl est polyvalente et peut être utilisée pour un large éventail d'opérations de contrôle
+	sur des descripteurs de fichiers, notamment pour des actions comme la modification des drapeaux 
+	de descripteur de fichier (par exemple, le passage du descripteur en mode non bloquant), la duplication 
+	de descripteurs, la récupération de diverses informations sur le descripteur de fichier, etc.
+
+==> CLOSE : 
+
+int close(int fd);
+
+>	Utilisée pour fermer un descripteur de fichier.
+	Elle permet de libérer les ressources associées à ce descripteur de fichier, que ce soit un fichier,
+	un socket, un fichier de périphérique ou tout autre objet ayant un descripteur de fichier ouvert.
+	- 'fd' : est le descripteur de fichier à fermer.
+	Cette fonction retourne 0 en cas de succès et -1 en cas d'échec.
+
+==> READ :
+
+ssize_t read(int fd, void *buf, size_t count);
+
+>	Utilisée pour lire des données à partir d'un descripteur de fichier donné 
+	(comme un fichier, un socket ou un périphérique) dans un tampon mémoire.
+	- 'fd' : est le descripteur de fichier depuis lequel vous souhaitez lire les données.
+	- 'buf' : est un pointeur vers le tampon mémoire où seront stockées les données lues.
+	- 'count' : est le nombre maximum d'octets à lire.
+	La fonction read() renvoie le nombre d'octets lus, ou -1 en cas d'erreur.
+	Si read() retourne 0, cela indique la fin du fichier (EOF).
+
+==> WRITE :
+
+ssize_t write(int fd, const void *buf, size_t count);
+
+>	Utilisée pour écrire des données depuis un tampon mémoire vers un descripteur de fichier
+	spécifié, tel qu'un fichier, un socket ou un périphérique.
+	- 'fd' : est le descripteur de fichier vers lequel vous souhaitez écrire des données.
+	- 'buf' : est un pointeur vers le tampon mémoire contenant les données à écrire.
+	- 'count' : est le nombre d'octets à écrire depuis le tampon vers le descripteur de fichier.
+	La fonction write() retourne le nombre d'octets effectivement écrits, ou -1 en cas d'erreur.
+
+==> WAITPID : 
+
+pid_t waitpid(pid_t pid, int *status, int options);
+
+>	Utilisée pour attendre la terminaison d'un processus enfant spécifique ou de tout processus enfant,
+	et récupérer son statut. Cette fonction est particulièrement utile dans le contexte de la
+	programmation multi-processus.
+	- 'pid' : spécifie le processus enfant dont le statut est attendu. Si pid vaut -1, la fonction 
+	   attend n'importe quel processus enfant. S'il vaut 0, elle attend n'importe quel processus 
+	   enfant dans le même groupe de processus que l'appelant. 
+	   Si pid est supérieur à 0, elle attend le processus enfant avec le PID correspondant.
+	- 'status' : est un pointeur vers une variable où le statut du processus enfant sera stocké.
+	- 'options' : détermine le comportement de la fonction. Les options couramment utilisées sont 
+	   'WNOHANG' pour un appel non bloquant et 'WUNTRACED' pour détecter les processus arrêtés.
+	La fonction waitpid() suspend l'exécution du processus appelant jusqu'à ce qu'un de ses processus 
+	enfants se termine ou qu'un signal soit reçu, puis elle récupère le statut du processus enfant terminé.
+
+==> KILL : 
+
+int kill(pid_t pid, int sig);
+
+>	Utilisée pour envoyer un signal à un processus spécifié, identifié par son identifiant de processus (PID).
+	Elle permet d'envoyer une grande variété de signaux à un processus donné pour contrôler son exécution.
+	- 'id' : est l'identifiant de processus (PID) auquel le signal sera envoyé. Un PID de valeur 0 spécifie 
+	   que le signal est envoyé à tous les processus du même groupe.
+	- 'sig' : est le numéro du signal à envoyer.
+	La fonction kill() retourne 0 en cas de succès et -1 en cas d'erreur.
+
+	Les signaux peuvent être utilisés pour diverses opérations, tels que terminer un processus
+	de manière contrôlée, demander à un processus de recharger sa configuration, demander un redémarrage,
+	ou transmettre des informations spécifiques aux processus.
+
+==> SIGNAL : 
+
+sighandler_t signal(int signum, sighandler_t handler);
+
+>	Utilisée pour associer des gestionnaires de signaux à des signaux spécifiques.
+	Les signaux sont des interruptions asynchrones envoyées à un processus pour indiquer des événements
+	tels qu'une erreur, une demande de terminaison, etc.
+	La fonction signal() permet de définir des gestionnaires de signaux personnalisés pour gérer ces signaux.
+	- 'signum' : est le numéro du signal à traiter.
+	- 'handler' : est un pointeur vers une fonction qui gère le signal spécifié.
+	La fonction signal() renvoie l'ancien gestionnaire de signal pour le signal donné.
+
+==> ACCESS : 
+
+int access(const char *path, int mode);
+
+>	Utilisée pour vérifier si un processus a des droits spécifiques d'accès (par exemple, lecture,
+	écriture, exécution) à un fichier ou à un répertoire.
+	- 'path' : est le chemin vers le fichier ou le répertoire que vous souhaitez vérifier.
+	- 'mode' : est le mode d'accès à vérifier. Il peut s'agir de 'R_OK' pour la permission de lecture,
+	   'W_OK' pour la permission d'écriture, 'X_OK' pour la permission d'exécution ou 'F_OK' pour 
+	   vérifier l'existence du fichier.
+	La fonction access() renvoie 0 si le processus dispose des droits d'accès spécifiés et -1 en cas d'erreur,
+	avec la variable errno indiquant la nature de l'erreur.
+
+==> STAT : 
+
+int stat(const char *path, struct stat *buf);
+
+>	Utilisée pour obtenir des informations sur un fichier spécifique, comme des détails sur son type,
+	sa taille, sa date de dernière modification, ses permissions, etc.
+	Ces informations sont stockées dans une structure appelée 'struct stat'.
+	- 'path' : est le chemin vers le fichier dont vous souhaitez obtenir des informations.
+	- 'buf' : est un pointeur vers une structure struct stat qui stockera les informations récupérées.
+	La fonction stat() renvoie 0 en cas de succès et -1 en cas d'erreur, en remplissant 
+	la structure 'struct stat' passée en paramètre avec les détails du fichier.
+
+==> OPENDIR : 
+
+DIR *opendir(const char *dirname);
+
+>	Utilisée pour ouvrir un répertoire spécifié et obtenir un pointeur de type DIR pour ce répertoire.
+	Ce pointeur est utilisé pour parcourir le contenu du répertoire, notamment pour lire les noms
+	des fichiers qu'il contient.
+	- 'dirname' : est le chemin du répertoire que vous souhaitez ouvrir.
+	La fonction opendir() renvoie un pointeur de type DIR qui pointe sur la première entrée 
+	du répertoire spécifié. 
+	Si l'ouverture réussit, ce pointeur est utilisé pour des opérations sur le répertoire, telles que 
+	la lecture des noms de fichiers dans ce répertoire.
+
+==> READDIR : 
+
+struct dirent *readdir(DIR *dirp);
+
+>	Utilisée pour lire le contenu d'un répertoire précédemment ouvert à l'aide de la fonction opendir().
+	Elle renvoie un pointeur vers une structure dirent représentant la prochaine entrée (fichier ou répertoire)
+	du répertoire.
+	- 'dirp' : est un pointeur de type DIR obtenu en ouvrant le répertoire à l'aide de opendir().
+	La fonction readdir() renvoie un pointeur vers une structure dirent contenant des informations sur
+	la prochaine entrée du répertoire.
+	Elle renvoie NULL lorsqu'il n'y a plus d'entrées à lire ou en cas d'erreur.
+
+==> CLOSEDIR : 
+
+int closedir(DIR *dirp);
+
+>	Utilisée pour fermer un répertoire précédemment ouvert à l'aide de la fonction opendir().
+	Elle libère les ressources allouées pour le descripteur du répertoire.
+	- 'dirp' : est le pointeur de type DIR représentant le répertoire que vous souhaitez fermer.
+	La fonction closedir() retourne 0 en cas de succès et -1 en cas d'erreur.
+
+
+
+	
